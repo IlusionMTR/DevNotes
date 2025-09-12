@@ -55,7 +55,7 @@ header {
   color: #333;
 }
 
-/* Form de nova nota */
+/* Form new notes */
 #add-note-container {
   display: flex;
   width: 400px;
@@ -82,7 +82,7 @@ header {
   color: #fff;
 }
 
-/* Notas */
+/* Notes */
 #notes-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, 250px);
