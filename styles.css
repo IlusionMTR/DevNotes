@@ -3,18 +3,18 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Helvetica;
+  font-family: Helvetica, Arial, sans-serif;
 }
 
 body {
   background-color: #202124;
+  color: #fff;
 }
 
 /* Cabeçalho */
 header {
   border-bottom: 1px solid #ccc;
   padding: 1rem 2rem;
-  color: #fff;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -40,7 +40,7 @@ header {
   color: #ddd;
 }
 
-#export-notes {
+button {
   background-color: #333;
   border: 2px solid #fff;
   border-radius: 4px;
@@ -50,7 +50,7 @@ header {
   transition: 0.4s;
 }
 
-#export-notes:hover {
+button:hover {
   background-color: #fff;
   color: #333;
 }
@@ -58,12 +58,13 @@ header {
 /* Form new notes */
 #add-note-container {
   display: flex;
-  width: 400px;
+  width: 600px;
   margin: 1rem auto 0;
   gap: 1rem;
 }
 
 #add-note-container input,
+#add-note-container select,
 #add-note-container button {
   padding: 10px;
   border-radius: 5px;
@@ -76,10 +77,12 @@ header {
   color: #fff;
 }
 
-#add-note-container button {
-  cursor: pointer;
+#add-note-container select {
   background-color: #333;
+  border: 1px solid #525356;
   color: #fff;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* Notes */
@@ -120,7 +123,7 @@ header {
   border-radius: 3px;
 }
 
-.note:hover>i {
+.note:hover > i {
   opacity: 1;
 }
 
@@ -148,4 +151,56 @@ header {
 
 .note.fixed {
   background-color: #3c3c3f;
+}
+
+.note-footer {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-size: 0.7rem;
+  color:#ccc;
+}
+
+.category-bar {
+  width: 10px;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: pointer;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.note.default .category-bar {
+  background-color: #ccc;
+}
+.note.urgent .category-bar {
+  background-color: #ff4d4d;
+}
+.note.progress .category-bar {
+  background-color: #ffd633;
+}
+.note.done .category-bar {
+  background-color: #33cc33;
+}
+
+/* Score */
+#score-container {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+#score-container h2 {
+  font-size: 1.5rem;
+}
+
+#score-container h3 {
+  margin-top: 0.5rem;
+  color: #ccc;
+}
+
+#score-feedback {
+  font-weight: bold;
+  margin-top: 0.5rem;
 }
