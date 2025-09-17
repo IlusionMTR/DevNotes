@@ -1,41 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Notes</title>
+    <title>SuperNotes</title>
+
     <!-- SheetJS (XLSX.js) -->
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
     <!-- Bootstrap Icons -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.1/font/bootstrap-icons.css"
     />
+
     <link rel="stylesheet" href="css/styles.css" />
     <script src="js/scripts.js" defer></script>
   </head>
   <body>
     <header>
-      <h1>DevNotes</h1>
+      <h1>SuperNotes</h1>
       <div id="search-container">
         <i class="bi bi-search"></i>
         <input
           type="text"
           id="search-input"
-          placeholder="Busque por uma nota..."/>
+          placeholder="Busque por uma nota..."
+        />
       </div>
-      <button id="export-csv">
+      <!-- <button id="export-csv">
         Exportar CSV <i class="bi bi-download"></i>
-      </button>
+      </button> -->
       <button id="export-xlsx">
         Exportar Excel <i class="bi bi-download"></i>
       </button>
     </header>
+    
     <div id="add-note-container">
       <input type="text" id="note-content" placeholder="O que deseja anotar?" />
+      <select id="note-category">
+        <option value="default">Normal</option>
+        <option value="urgent">Urgente</option>
+        <option value="progress">Em andamento</option>
+        <option value="done">Concluído</option>
+      </select>
       <button class="add-note"><i class="bi bi-plus-lg"></i></button>
     </div>
+
+    <!-- Score -->
+    <div id="score-container">
+      <h2>Produtividade do mês: <span id="score-value">0%</span></h2>
+      <h3>Média geral: <span id="average-score">0%</span></h3>
+      <p id="score-feedback"></p>
+    </div>
+
     <div id="notes-container"></div>
   </body>
 </html>
