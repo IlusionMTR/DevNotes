@@ -1,4 +1,3 @@
-// Elements
 const notesContainer = document.querySelector("#notes-container");
 const noteInput = document.querySelector("#note-content");
 const noteCategory = document.querySelector("#note-category");
@@ -6,8 +5,8 @@ const addNoteBtn = document.querySelector(".add-note");
 const searchInput = document.querySelector("#search-input");
 const exportXLSXBtn = document.querySelector("#export-xlsx");
 const scoreValue = document.querySelector("#score-value");
+const feedbackEl = document.querySelector("#score-feedback");
 
-// Traduções das categorias para português
 const categoryMap = {
   done: "Concluído",
   progress: "Em progresso",
@@ -15,7 +14,9 @@ const categoryMap = {
   urgent: "Urgente"
 };
 
-// Functions
+const categoryOrder = ["default", "urgent", "progress", "done"];
+
+// functions
 function showNotes() {
   cleanNotes();
   getNotes().forEach((note) => {
@@ -34,7 +35,7 @@ function showNotes() {
 
 function getNotes() {
   const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-  return notes.sort((a, b) => (a.fixed > b.fixed ? -1 : 1));
+  return notes.sort((a, b) => (a.fixed === b.fixed ? 0 : a.fixed ? -1 : 1));
 }
 
 function cleanNotes() {
@@ -43,7 +44,6 @@ function cleanNotes() {
 
 function saveNotes(notes) {
   localStorage.setItem("notes", JSON.stringify(notes));
-  updateScore();
 }
 
 function generateId() {
@@ -59,10 +59,7 @@ function formatDate(dateString) {
 function createNote(id, content, fixed, category = "default", createdAt, completedAt) {
   const element = document.createElement("div");
   element.classList.add("note", category);
-
-  if (fixed) {
-    element.classList.add("fixed");
-  }
+  if (fixed) element.classList.add("fixed");
 
   const categoryBar = document.createElement("div");
   categoryBar.classList.add("category-bar");
@@ -90,7 +87,6 @@ function createNote(id, content, fixed, category = "default", createdAt, complet
   duplicateIcon.classList.add("bi", "bi-file-earmark-plus");
   element.appendChild(duplicateIcon);
 
-  // Rodapé da nota (datas)
   const footer = document.createElement("div");
   footer.classList.add("note-footer");
   footer.innerHTML = `
@@ -99,23 +95,11 @@ function createNote(id, content, fixed, category = "default", createdAt, complet
   `;
   element.appendChild(footer);
 
-  // Events
-  textarea.addEventListener("input", () => {
-    const newText = textarea.value;
-    updateNote(id, newText);
-  });
-
-  deleteIcon.addEventListener("click", () => {
-    deleteNote(id, element);
-  });
-
-  pinIcon.addEventListener("click", () => {
-    toggleFixNote(id);
-  });
-
-  duplicateIcon.addEventListener("click", () => {
-    copyNote(id);
-  });
+  // events
+  textarea.addEventListener("input", () => updateNote(id, textarea.value));
+  deleteIcon.addEventListener("click", () => deleteNote(id, element));
+  pinIcon.addEventListener("click", () => toggleFixNote(id));
+  duplicateIcon.addEventListener("click", () => copyNote(id));
 
   return element;
 }
@@ -124,30 +108,23 @@ function addNote() {
   const notes = getNotes();
   const content = noteInput.value.trim();
   const category = noteCategory.value;
-
   if (content === "") return;
+
+  const now = new Date().toISOString();
 
   const newNote = {
     id: generateId(),
     content,
     fixed: false,
     category,
-    createdAt: new Date().toISOString(),
-    completedAt: null
+    createdAt: now,
+    completedAt: category === "done" ? now : null 
   };
 
-  const noteElement = createNote(
-    newNote.id,
-    newNote.content,
-    newNote.fixed,
-    newNote.category,
-    newNote.createdAt,
-    newNote.completedAt
-  );
-  notesContainer.appendChild(noteElement);
   notes.push(newNote);
   saveNotes(notes);
   noteInput.value = "";
+  showNotes();
 }
 
 function updateNote(id, newContent) {
@@ -156,13 +133,17 @@ function updateNote(id, newContent) {
   if (note) {
     note.content = newContent;
     saveNotes(notes);
+    updateScore();
   }
 }
 
 function deleteNote(id, element) {
   const notes = getNotes().filter((note) => note.id !== id);
   saveNotes(notes);
-  notesContainer.removeChild(element);
+  if (element && element.parentNode === notesContainer) {
+    notesContainer.removeChild(element);
+  }
+  updateScore();
 }
 
 function changeNoteCategory(id) {
@@ -175,22 +156,12 @@ function changeNoteCategory(id) {
   const nextCategory = categoryOrder[nextIndex];
 
   note.category = nextCategory;
-
-  // Salva a data de conclusão se for concluído
-  if (nextCategory === "done" && !note.completedAt) {
-    note.completedAt = new Date().toISOString();
-  }
-
-  // Remove data se deixar de ser concluído
-  if (note.completedAt && nextCategory !== "done") {
-    note.completedAt = null;
-  }
+  if (nextCategory === "done" && !note.completedAt) note.completedAt = new Date().toISOString();
+  if (note.completedAt && nextCategory !== "done") note.completedAt = null;
 
   saveNotes(notes);
   showNotes();
 }
-
-const categoryOrder = ["default", "urgent", "progress", "done"];
 
 function toggleFixNote(id) {
   const notes = getNotes();
@@ -239,7 +210,6 @@ function searchNotes(search) {
   });
 }
 
-// Exportar para XLSX (Excel)
 function exportToXLSX() {
   const notes = getNotes();
   if (notes.length === 0) {
@@ -269,63 +239,34 @@ function exportToXLSX() {
   XLSX.writeFile(workbook, "notas.xlsx");
 }
 
-// Score system
+// score
 function updateScore() {
   const notes = getNotes();
   const total = notes.length;
   const done = notes.filter((n) => n.category === "done").length;
 
   const score = total > 0 ? Math.round((done / total) * 100) : 0;
-  scoreValue.textContent = score + "%";
+  if (scoreValue) scoreValue.textContent = score + "%";
 
-  saveScoreHistory(score);
-
-  const average = calculateAverage();
-  document.querySelector("#average-score").textContent = average + "%";
-
-  const feedbackEl = document.querySelector("#score-feedback");
-  if (average < 15) {
-    feedbackEl.textContent = "Sua média está baixa, precisa melhorar!";
-    feedbackEl.style.color = "#ff4d4d";
-  } else if (average < 30) {
-    feedbackEl.textContent = "Está razoável, mas dá para evoluir.";
-    feedbackEl.style.color = "#ffd633";
-  } else {
-    feedbackEl.textContent = "Excelente, continue assim!";
-    feedbackEl.style.color = "#33cc33";
+  if (feedbackEl) {
+    if (score <= 25) {
+      feedbackEl.textContent = "Sua produtividade está baixa, precisa melhorar!";
+      feedbackEl.style.color = "#ff4d4d";
+    } else if (score <= 50) {
+      feedbackEl.textContent = "Produtividade razoável, pode melhorar.";
+      feedbackEl.style.color = "#ffd633";
+    } else {
+      feedbackEl.textContent = "Excelente produtividade! Continue assim!";
+      feedbackEl.style.color = "#33cc33";
+    }
   }
 }
 
-function saveScoreHistory(score) {
-  const history = JSON.parse(localStorage.getItem("scoreHistory") || "[]");
-  history.push(score);
-  if (history.length > 30) history.shift();
-  localStorage.setItem("scoreHistory", JSON.stringify(history));
-}
+// events
+addNoteBtn.addEventListener("click", addNote);
+noteInput.addEventListener("keydown", (e) => { if (e.key === "Enter") addNote(); });
+searchInput.addEventListener("input", (e) => searchNotes(e.target.value));
+exportXLSXBtn.addEventListener("click", exportToXLSX);
 
-function calculateAverage() {
-  const history = JSON.parse(localStorage.getItem("scoreHistory") || "[]");
-  if (history.length === 0) return 0;
-  const sum = history.reduce((acc, val) => acc + val, 0);
-  return Math.round(sum / history.length);
-}
-
-// Events
-addNoteBtn.addEventListener("click", () => addNote());
-
-noteInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    addNote();
-  }
-});
-
-searchInput.addEventListener("input", (e) => {
-  searchNotes(e.target.value);
-});
-
-exportXLSXBtn.addEventListener("click", () => {
-  exportToXLSX();
-});
-
-// Inicialização
+// inicialização
 showNotes();
