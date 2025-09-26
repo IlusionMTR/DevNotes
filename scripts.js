@@ -9,8 +9,8 @@ const feedbackEl = document.querySelector("#score-feedback");
 
 const categoryMap = {
   done: "Concluído",
-  progress: "Em andamento",
-  default: "Normal",
+  progress: "Em progresso",
+  default: "Não urgente",
   urgent: "Urgente"
 };
 
@@ -18,9 +18,7 @@ const categoryOrder = ["default", "urgent", "progress", "done"];
 
 // functions
 function showNotes() {
-  // Limpa todas as colunas
-  document.querySelectorAll(".notes-list").forEach(list => list.innerHTML = "");
-
+  cleanNotes();
   getNotes().forEach((note) => {
     const noteElement = createNote(
       note.id,
@@ -30,34 +28,18 @@ function showNotes() {
       note.createdAt,
       note.completedAt
     );
-
-    // coloca na coluna da categoria correta
-    const targetList = document.querySelector(
-      `.notes-column[data-category="${note.category}"] .notes-list`
-    );
-    if (targetList) targetList.appendChild(noteElement);
+    notesContainer.appendChild(noteElement);
   });
-
   updateScore();
 }
 
 function getNotes() {
   const notes = JSON.parse(localStorage.getItem("notes") || "[]");
-
-  // fixadas > não fixadas; concluidas sempre por último
-  return notes.sort((a, b) => {
-    if (a.fixed && !b.fixed) return -1;
-    if (!a.fixed && b.fixed) return 1;
-
-    if (a.category === "done" && b.category !== "done") return 1;
-    if (b.category === "done" && a.category !== "done") return -1;
-
-    return categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
-  });
+  return notes.sort((a, b) => (a.fixed === b.fixed ? 0 : a.fixed ? -1 : 1));
 }
 
 function cleanNotes() {
-  document.querySelectorAll(".notes-list").forEach(list => list.innerHTML = "");
+  notesContainer.replaceChildren([]);
 }
 
 function saveNotes(notes) {
@@ -158,7 +140,9 @@ function updateNote(id, newContent) {
 function deleteNote(id, element) {
   const notes = getNotes().filter((note) => note.id !== id);
   saveNotes(notes);
-  element.remove();
+  if (element && element.parentNode === notesContainer) {
+    notesContainer.removeChild(element);
+  }
   updateScore();
 }
 
@@ -222,10 +206,7 @@ function searchNotes(search) {
       note.createdAt,
       note.completedAt
     );
-    const targetList = document.querySelector(
-      `.notes-column[data-category="${note.category}"] .notes-list`
-    );
-    if (targetList) targetList.appendChild(element);
+    notesContainer.appendChild(element);
   });
 }
 
@@ -239,6 +220,14 @@ function exportToXLSX() {
   const data = notes.map((note) => ({
     Nota: note.content,
     Categoria: categoryMap[note.category] || "Não definida",
+    Prioridade:
+      note.category === "done"
+        ? "Concluído"
+        : note.category === "urgent"
+        ? "Imediata"
+        : note.category === "progress"
+        ? "Média"
+        : "Baixa",
     "Data de Envio": formatDate(note.createdAt),
     "Data de Conclusão": formatDate(note.completedAt)
   }));
