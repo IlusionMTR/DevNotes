@@ -18,7 +18,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  flex-wrap: wrap; /* deixa quebrar para responsividade */
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -42,7 +42,7 @@ header {
   max-width: 400px;
 }
 
-#search::placeholder {
+#search-input::placeholder {
   color: #ddd;
 }
 
@@ -101,6 +101,7 @@ button:hover {
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   padding: 2rem;
   gap: 2rem;
+  position: relative;
 }
 
 .note {
@@ -111,6 +112,7 @@ button:hover {
   border-radius: 10px;
   color: #fff;
   position: relative;
+  will-change: transform;
 }
 
 .note textarea {
@@ -182,18 +184,10 @@ button:hover {
   border-bottom-left-radius: 10px;
 }
 
-.note.default .category-bar {
-  background-color: #ccc;
-}
-.note.urgent .category-bar {
-  background-color: #ff4d4d;
-}
-.note.progress .category-bar {
-  background-color: #ffd633;
-}
-.note.done .category-bar {
-  background-color: #33cc33;
-}
+.note.default .category-bar { background-color: #ccc; }
+.note.urgent .category-bar { background-color: #ff4d4d; }
+.note.progress .category-bar { background-color: #ffd633; }
+.note.done .category-bar { background-color: #33cc33; }
 
 /* Score */
 #score-container {
@@ -206,55 +200,22 @@ button:hover {
   font-size: 1.5rem;
 }
 
-#score-container h3 {
-  margin-top: 0.5rem;
-  color: #ccc;
-}
-
 #score-feedback {
   font-weight: bold;
   margin-top: 0.5rem;
 }
 
 /* Responsividade */
-
-/* Tablets*/
 @media (max-width: 991px) {
-  header {
-    flex-direction: column;
-  }
-
-  #add-note-container {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  #search-input {
-    max-width: 100%;
-  }
+  header { flex-direction: column; }
+  #add-note-container { flex-direction: column; align-items: stretch; }
+  #search-input { max-width: 100%; }
 }
 
-/* Celular */
 @media (max-width: 576px) {
-  header h1 {
-    font-size: 1.5rem;
-  }
-
-  button {
-    width: 100%;
-    text-align: center;
-  }
-
-  #add-note-container {
-    gap: 0.5rem;
-  }
-
-  #notes-container {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-  }
-
-  .note {
-    min-height: 150px;
-  }
+  header h1 { font-size: 1.5rem; }
+  button { width: 100%; text-align: center; }
+  #add-note-container { gap: 0.5rem; }
+  #notes-container { grid-template-columns: 1fr; padding: 1rem; }
+  .note { min-height: 150px; }
 }
