@@ -27,6 +27,7 @@ header {
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  justify-content: center;
   min-width: 200px;
 }
 
