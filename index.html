@@ -8,9 +8,10 @@
 
     <!-- SheetJS (XLSX.js) -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.1/font/bootstrap-icons.css"/>
-   <!-- Links -->
+
     <link rel="stylesheet" href="styles.css" />
     <script src="scripts.js" defer></script>
   </head>
@@ -19,15 +20,8 @@
       <h1>SuperNotas</h1>
       <div id="search-container">
         <i class="bi bi-search"></i>
-        <input
-          type="text"
-          id="search-input"
-          placeholder="Busque por uma nota..."
-        />
+        <input type="text" id="search-input" placeholder="Busque por uma nota..." />
       </div>
-      <!-- <button id="export-csv">
-        Exportar CSV<i class="bi bi-download"></i>
-      </button> -->
       <button id="export-xlsx">
         Exportar Excel <i class="bi bi-download"></i>
       </button>
@@ -47,10 +41,27 @@
     <!-- Score -->
     <div id="score-container">
       <h2>Produtividade do mês: <span id="score-value">0%</span></h2>
-      <!-- <h3>Média geral: <span id="average-score">0%</span></h3> -->
       <p id="score-feedback"></p>
     </div>
 
-    <div id="notes-container"></div>
+    <!-- class -->
+    <div id="notes-container">
+      <div class="notes-column" data-category="default">
+        <h3>Normal</h3>
+        <div class="notes-list"></div>
+      </div>
+      <div class="notes-column" data-category="urgent">
+        <h3>Urgente</h3>
+        <div class="notes-list"></div>
+      </div>
+      <div class="notes-column" data-category="progress">
+        <h3>Em andamento</h3>
+        <div class="notes-list"></div>
+      </div>
+      <div class="notes-column" data-category="done">
+        <h3>Concluído</h3>
+        <div class="notes-list"></div>
+      </div>
+    </div>
   </body>
 </html>
