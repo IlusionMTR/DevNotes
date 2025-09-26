@@ -204,3 +204,19 @@ button:hover {
   font-weight: bold;
   margin-top: 0.5rem;
 }
+
+/* Tela grande */
+@media (min-width: 1200px) {
+}
+
+/* Tela média */
+@media (max-width: 1199px) and (min-width: 992px) {
+}
+
+/* Tablet */
+@media (max-width: 991px) and (min-width: 768px) {
+}
+
+/* Celular */
+@media (max-width: 767px) and (min-width: 481px) {
+}
