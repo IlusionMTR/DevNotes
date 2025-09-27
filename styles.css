@@ -112,7 +112,7 @@ button:hover {
   border-radius: 10px;
   color: #fff;
   position: relative;
-  will-change: transform;
+  will-change: transform, opacity;
 }
 
 .note textarea {
@@ -182,12 +182,36 @@ button:hover {
   cursor: pointer;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
+  transition: background-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.note.default .category-bar { background-color: #ccc; }
-.note.urgent .category-bar { background-color: #ff4d4d; }
-.note.progress .category-bar { background-color: #ffd633; }
-.note.done .category-bar { background-color: #33cc33; }
+/* Cores das categorias */
+.category-bar[data-category="default"] { background-color: #ccc; }
+.category-bar[data-category="urgent"] { background-color: #ff4d4d; }
+.category-bar[data-category="progress"] { background-color: #ffd633; }
+.category-bar[data-category="done"] { background-color: #33cc33; }
+
+/* Animação de transição de cor */
+.category-bar.color-transition {
+  background: linear-gradient(90deg, var(--old-color) 0%, var(--new-color) 100%);
+  background-size: 200% 100%;
+  animation: colorSlide 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes colorSlide {
+  0% {
+    background-position: 100% 0%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Efeito de clique na barra de categoria */
+.category-bar:active {
+  transform: scaleX(1.2);
+  transition: transform 0.1s ease;
+}
 
 /* Score */
 #score-container {
