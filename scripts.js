@@ -14,9 +14,15 @@ const categoryMap = {
   urgent: "Urgente"
 };
 
+const categoryColors = {
+  default: "#ccc",
+  urgent: "#ff4d4d", 
+  progress: "#ffd633",
+  done: "#33cc33"
+};
+
 const categoryOrder = ["default", "urgent", "progress", "done"];
 
-// functions
 function getNotes() {
   const notes = JSON.parse(localStorage.getItem("notes") || "[]");
   return notes.sort((a, b) => {
@@ -48,6 +54,7 @@ function createNote(id, content, fixed, category, createdAt, completedAt) {
 
   const categoryBar = document.createElement("div");
   categoryBar.classList.add("category-bar");
+  categoryBar.dataset.category = category;
   element.appendChild(categoryBar);
   categoryBar.addEventListener("click", e => {
     e.stopPropagation();
@@ -79,7 +86,6 @@ function createNote(id, content, fixed, category, createdAt, completedAt) {
   `;
   element.appendChild(footer);
 
-  // eventos
   textarea.addEventListener("input", () => updateNote(id, textarea.value));
   deleteIcon.addEventListener("click", () => deleteNote(id, element));
   pinIcon.addEventListener("click", () => toggleFixNote(id));
@@ -88,7 +94,6 @@ function createNote(id, content, fixed, category, createdAt, completedAt) {
   return element;
 }
 
-// add/att/delete
 function addNote() {
   const content = noteInput.value.trim();
   const category = noteCategory.value;
@@ -114,9 +119,15 @@ function updateNote(id, newContent) {
 }
 
 function deleteNote(id, element) {
-  const notes = getNotes().filter(n => n.id !== id);
-  saveNotes(notes);
-  renderNotesWithAnimation();
+  // Animação de saída mais suave
+  element.style.transform = "scale(0.8) translateY(10px)";
+  element.style.opacity = "0";
+  
+  setTimeout(() => {
+    const notes = getNotes().filter(n => n.id !== id);
+    saveNotes(notes);
+    renderNotesWithAnimation();
+  }, 400);
 }
 
 function changeNoteCategory(id) {
@@ -124,13 +135,22 @@ function changeNoteCategory(id) {
   const note = notes.find(n => n.id === id);
   if (!note) return;
 
+  const oldCategory = note.category;
   const idx = categoryOrder.indexOf(note.category);
-  note.category = categoryOrder[(idx + 1) % categoryOrder.length];
-  if (note.category === "done" && !note.completedAt) note.completedAt = new Date().toISOString();
-  if (note.completedAt && note.category !== "done") note.completedAt = null;
-
-  saveNotes(notes);
-  renderNotesWithAnimation();
+  const newCategory = categoryOrder[(idx + 1) % categoryOrder.length];
+  
+  // Animação de transição de cor primeiro
+  animateColorTransition(id, oldCategory, newCategory);
+  
+  // Depois atualiza os dados
+  setTimeout(() => {
+    note.category = newCategory;
+    if (note.category === "done" && !note.completedAt) note.completedAt = new Date().toISOString();
+    if (note.completedAt && note.category !== "done") note.completedAt = null;
+    
+    saveNotes(notes);
+    renderNotesWithAnimation();
+  }, 600); // Tempo para a animação de cor completar
 }
 
 function toggleFixNote(id) {
@@ -151,13 +171,11 @@ function copyNote(id) {
   renderNotesWithAnimation();
 }
 
-// pesquisa
 function searchNotes(search) {
   const filtered = getNotes().filter(n => n.content.toLowerCase().includes(search.toLowerCase()));
   renderNotesWithAnimation(filtered);
 }
 
-// export excel
 function exportToXLSX() {
   const notes = getNotes();
   if (!notes.length) { alert("Nenhuma nota para exportar."); return; }
@@ -176,7 +194,6 @@ function exportToXLSX() {
   XLSX.writeFile(workbook, "notas.xlsx");
 }
 
-// score
 function updateScore() {
   const notes = getNotes();
   const total = notes.length;
@@ -184,50 +201,108 @@ function updateScore() {
   const score = total > 0 ? Math.round((done / total) * 100) : 0;
   scoreValue.textContent = score + "%";
 
-  if (score <= 25) feedbackEl.textContent = "Sua produtividade está baixa, precisa melhorar!", feedbackEl.style.color="#ff4d4d";
-  else if (score <= 50) feedbackEl.textContent = "Produtividade razoável, pode melhorar.", feedbackEl.style.color="#ffd633";
-  else feedbackEl.textContent = "Excelente produtividade! Continue assim!", feedbackEl.style.color="#33cc33";
+  if (score <= 25) {
+    feedbackEl.textContent = "Sua produtividade está baixa, precisa melhorar!";
+    feedbackEl.style.color = "#ff4d4d";
+  } else if (score <= 50) {
+    feedbackEl.textContent = "Produtividade razoável, pode melhorar.";
+    feedbackEl.style.color = "#ffd633";
+  } else {
+    feedbackEl.textContent = "Excelente produtividade! Continue assim!";
+    feedbackEl.style.color = "#33cc33";
+  }
 }
 
-// render animacao
-function renderNotesWithAnimation(filteredNotes=null) {
+// Animação suave de transição de cor
+function animateColorTransition(noteId, oldCategory, newCategory) {
+  const noteElement = document.querySelector(`.note[data-id="${noteId}"]`);
+  const categoryBar = noteElement.querySelector('.category-bar');
+  
+  if (!categoryBar) return;
+  
+  const oldColor = categoryColors[oldCategory];
+  const newColor = categoryColors[newCategory];
+  
+  // Adiciona a classe de animação
+  categoryBar.classList.add('color-transition');
+  categoryBar.style.setProperty('--old-color', oldColor);
+  categoryBar.style.setProperty('--new-color', newColor);
+  
+  // Atualiza a categoria no dataset para a animação CSS
+  categoryBar.dataset.category = newCategory;
+  
+  // Remove a classe após a animação
+  setTimeout(() => {
+    categoryBar.classList.remove('color-transition');
+  }, 600);
+}
+
+// Animação para renderização geral
+function renderNotesWithAnimation(filteredNotes = null) {
   const notes = filteredNotes || getNotes();
+  
+  // Salva as posições atuais
   const oldPositions = {};
   Array.from(notesContainer.children).forEach(note => {
     oldPositions[note.dataset.id] = note.getBoundingClientRect();
   });
-
-  // limpa container
-  notesContainer.replaceChildren();
-
-  // adiciona notas
+  
+  // Limpa o container
+  notesContainer.innerHTML = "";
+  
+  // Adiciona as notas novamente
   notes.forEach(note => {
     const el = createNote(note.id, note.content, note.fixed, note.category, note.createdAt, note.completedAt);
     notesContainer.appendChild(el);
   });
-
-  // animação deslize
+  
+  // Anima cada nota para sua nova posição
   Array.from(notesContainer.children).forEach(note => {
     const oldRect = oldPositions[note.dataset.id];
-    if (!oldRect) return;
+    if (!oldRect) {
+      // Nova nota - animação de entrada
+      note.style.opacity = "0";
+      note.style.transform = "translateY(20px)";
+      
+      requestAnimationFrame(() => {
+        note.style.transition = "opacity 0.4s ease, transform 0.4s ease";
+        note.style.opacity = "1";
+        note.style.transform = "";
+        
+        setTimeout(() => {
+          note.style.transition = "";
+        }, 400);
+      });
+      return;
+    }
+    
     const newRect = note.getBoundingClientRect();
-    const dx = oldRect.left - newRect.left;
-    const dy = oldRect.top - newRect.top;
-
-    note.style.transform = `translate(${dx}px, ${dy}px)`;
+    const containerRect = notesContainer.getBoundingClientRect();
+    
+    const deltaX = oldRect.left - containerRect.left - (newRect.left - containerRect.left);
+    const deltaY = oldRect.top - containerRect.top - (newRect.top - containerRect.top);
+    
+    note.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+    note.style.opacity = "0.8";
+    
     requestAnimationFrame(() => {
-      note.style.transform = '';
+      note.style.transition = "transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.6s ease";
+      note.style.transform = "";
+      note.style.opacity = "1";
+      
+      setTimeout(() => {
+        note.style.transition = "";
+      }, 600);
     });
   });
-
+  
   updateScore();
 }
 
-// eventos
+// Eventos
 addNoteBtn.addEventListener("click", addNote);
 noteInput.addEventListener("keydown", e => { if (e.key === "Enter") addNote(); });
 searchInput.addEventListener("input", e => searchNotes(e.target.value));
 exportXLSXBtn.addEventListener("click", exportToXLSX);
 
-// inicializacao
 renderNotesWithAnimation();
