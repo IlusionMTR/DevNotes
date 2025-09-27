@@ -119,7 +119,6 @@ function updateNote(id, newContent) {
 }
 
 function deleteNote(id, element) {
-  // Animação de saída mais suave
   element.style.transform = "scale(0.8) translateY(10px)";
   element.style.opacity = "0";
   
@@ -139,10 +138,8 @@ function changeNoteCategory(id) {
   const idx = categoryOrder.indexOf(note.category);
   const newCategory = categoryOrder[(idx + 1) % categoryOrder.length];
   
-  // Animação de transição de cor primeiro
   animateColorTransition(id, oldCategory, newCategory);
   
-  // Depois atualiza os dados
   setTimeout(() => {
     note.category = newCategory;
     if (note.category === "done" && !note.completedAt) note.completedAt = new Date().toISOString();
@@ -150,7 +147,7 @@ function changeNoteCategory(id) {
     
     saveNotes(notes);
     renderNotesWithAnimation();
-  }, 600); // Tempo para a animação de cor completar
+  }, 600);
 }
 
 function toggleFixNote(id) {
@@ -194,26 +191,80 @@ function exportToXLSX() {
   XLSX.writeFile(workbook, "notas.xlsx");
 }
 
+// ALGORITMO DE PRODUTIVIDADE COM MAIS IMPACTO
 function updateScore() {
   const notes = getNotes();
-  const total = notes.length;
-  const done = notes.filter(n => n.category === "done").length;
-  const score = total > 0 ? Math.round((done / total) * 100) : 0;
-  scoreValue.textContent = score + "%";
+  
+  if (notes.length === 0) {
+    scoreValue.textContent = "0%";
+    feedbackEl.textContent = "Adicione suas tarefas para começar!";
+    feedbackEl.style.color = "#ccc";
+    return;
+  }
 
-  if (score <= 25) {
-    feedbackEl.textContent = "Sua produtividade está baixa, precisa melhorar!";
+  // Foca apenas nas notas da SEMANA ATUAL (segunda a domingo)
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Segunda-feira
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  const weekNotes = notes.filter(note => {
+    const noteDate = new Date(note.createdAt);
+    return noteDate >= startOfWeek;
+  });
+
+  if (weekNotes.length === 0) {
+    scoreValue.textContent = "0%";
+    feedbackEl.textContent = "Nenhuma tarefa nesta semana ainda";
+    feedbackEl.style.color = "#ccc";
+    return;
+  }
+
+  // CÁLCULO SIMPLES E LÓGICO:
+  // 1. Tarefas concluídas = positivas
+  // 2. Tarefas urgentes não concluídas = negativas
+  // 3. Tarefas em andamento = neutras/parcialmente positivas
+  
+  const totalWeekNotes = weekNotes.length;
+  const doneNotes = weekNotes.filter(n => n.category === 'done').length;
+  const urgentNotes = weekNotes.filter(n => n.category === 'urgent').length;
+  const progressNotes = weekNotes.filter(n => n.category === 'progress').length;
+
+  // Pontuação base: porcentagem de tarefas concluídas
+  let baseScore = (doneNotes / totalWeekNotes) * 100;
+
+  // Tarefas em andamento contam como 50% concluídas
+  const progressBonus = (progressNotes / totalWeekNotes) * 50;
+  
+  // Penalidade: tarefas urgentes não concluídas reduzem a nota
+  const urgentPenalty = (urgentNotes / totalWeekNotes) * 30;
+
+  // Score final
+  let finalScore = baseScore + progressBonus - urgentPenalty;
+  finalScore = Math.max(0, Math.min(100, Math.round(finalScore)));
+
+  // Display
+  scoreValue.textContent = finalScore + "%";
+  
+  // Feedback simples e útil
+  if (finalScore === 0) {
+    feedbackEl.textContent = "Vamos começar! Adicione suas tarefas.";
     feedbackEl.style.color = "#ff4d4d";
-  } else if (score <= 50) {
-    feedbackEl.textContent = "Produtividade razoável, pode melhorar.";
+  } else if (finalScore <= 30) {
+    feedbackEl.textContent = "Foco necessário! Priorize as tarefas urgentes.";
+    feedbackEl.style.color = "#ff4d4d";
+  } else if (finalScore <= 60) {
+    feedbackEl.textContent = "Bom progresso! Continue evoluindo as tarefas.";
     feedbackEl.style.color = "#ffd633";
-  } else {
-    feedbackEl.textContent = "Excelente produtividade! Continue assim!";
+  } else if (finalScore <= 85) {
+    feedbackEl.textContent = "Ótima semana! Quase tudo sob controle.";
     feedbackEl.style.color = "#33cc33";
+  } else {
+    feedbackEl.textContent = "Semana excelente! Tudo em dia!";
+    feedbackEl.style.color = "#00b300";
   }
 }
 
-// Animação suave de transição de cor
 function animateColorTransition(noteId, oldCategory, newCategory) {
   const noteElement = document.querySelector(`.note[data-id="${noteId}"]`);
   const categoryBar = noteElement.querySelector('.category-bar');
@@ -223,44 +274,34 @@ function animateColorTransition(noteId, oldCategory, newCategory) {
   const oldColor = categoryColors[oldCategory];
   const newColor = categoryColors[newCategory];
   
-  // Adiciona a classe de animação
   categoryBar.classList.add('color-transition');
   categoryBar.style.setProperty('--old-color', oldColor);
   categoryBar.style.setProperty('--new-color', newColor);
-  
-  // Atualiza a categoria no dataset para a animação CSS
   categoryBar.dataset.category = newCategory;
   
-  // Remove a classe após a animação
   setTimeout(() => {
     categoryBar.classList.remove('color-transition');
   }, 600);
 }
 
-// Animação para renderização geral
 function renderNotesWithAnimation(filteredNotes = null) {
   const notes = filteredNotes || getNotes();
   
-  // Salva as posições atuais
   const oldPositions = {};
   Array.from(notesContainer.children).forEach(note => {
     oldPositions[note.dataset.id] = note.getBoundingClientRect();
   });
   
-  // Limpa o container
   notesContainer.innerHTML = "";
   
-  // Adiciona as notas novamente
   notes.forEach(note => {
     const el = createNote(note.id, note.content, note.fixed, note.category, note.createdAt, note.completedAt);
     notesContainer.appendChild(el);
   });
   
-  // Anima cada nota para sua nova posição
   Array.from(notesContainer.children).forEach(note => {
     const oldRect = oldPositions[note.dataset.id];
     if (!oldRect) {
-      // Nova nota - animação de entrada
       note.style.opacity = "0";
       note.style.transform = "translateY(20px)";
       
@@ -305,4 +346,5 @@ noteInput.addEventListener("keydown", e => { if (e.key === "Enter") addNote(); }
 searchInput.addEventListener("input", e => searchNotes(e.target.value));
 exportXLSXBtn.addEventListener("click", exportToXLSX);
 
+// Inicialização
 renderNotesWithAnimation();
