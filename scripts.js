@@ -191,7 +191,7 @@ function exportToXLSX() {
   XLSX.writeFile(workbook, "notas.xlsx");
 }
 
-// ALGORITMO DE PRODUTIVIDADE COM MAIS IMPACTO
+// algoritmo produtividade
 function updateScore() {
   const notes = getNotes();
   
@@ -202,7 +202,7 @@ function updateScore() {
     return;
   }
 
-  // Foca apenas nas notas da SEMANA ATUAL (segunda a domingo)
+  // Foca apenas nas notas da semana
   const now = new Date();
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Segunda-feira
@@ -233,10 +233,9 @@ function updateScore() {
   // Pontuação base: porcentagem de tarefas concluídas
   let baseScore = (doneNotes / totalWeekNotes) * 100;
 
-  // Tarefas em andamento contam como 50% concluídas
   const progressBonus = (progressNotes / totalWeekNotes) * 50;
   
-  // Penalidade: tarefas urgentes não concluídas reduzem a nota
+  // notas urgentes reduzem o scor
   const urgentPenalty = (urgentNotes / totalWeekNotes) * 30;
 
   // Score final
@@ -246,7 +245,7 @@ function updateScore() {
   // Display
   scoreValue.textContent = finalScore + "%";
   
-  // Feedback simples e útil
+  // Feedback 
   if (finalScore === 0) {
     feedbackEl.textContent = "Vamos começar! Adicione suas tarefas.";
     feedbackEl.style.color = "#ff4d4d";
