@@ -23,6 +23,29 @@ const categoryColors = {
 
 const categoryOrder = ["default", "urgent", "progress", "done"];
 
+// Função para atualizar o indicador de cor
+function updateColorIndicator() {
+  const select = document.querySelector("#note-category");
+  const indicator = document.querySelector("#color-indicator");
+  const selectedValue = select.value;
+  
+  // Remove todas as classes de cor
+  indicator.classList.remove("default", "urgent", "progress", "done");
+  // Adiciona a classe correspondente
+  indicator.classList.add(selectedValue);
+}
+
+// Inicializar o select customizado
+function initCustomSelect() {
+  const select = document.querySelector("#note-category");
+  
+  // Atualizar indicador quando a seleção mudar
+  select.addEventListener("change", updateColorIndicator);
+  
+  // Inicializar com a cor padrão
+  updateColorIndicator();
+}
+
 function getNotes() {
   const notes = JSON.parse(localStorage.getItem("notes") || "[]");
   return notes.sort((a, b) => {
@@ -220,7 +243,6 @@ function updateScore() {
     return;
   }
 
-  // CÁLCULO SIMPLES E LÓGICO:
   // 1. Tarefas concluídas = positivas
   // 2. Tarefas urgentes não concluídas = negativas
   // 3. Tarefas em andamento = neutras/parcialmente positivas
@@ -347,3 +369,4 @@ exportXLSXBtn.addEventListener("click", exportToXLSX);
 
 // Inicialização
 renderNotesWithAnimation();
+initCustomSelect(); // Inicializa o indicador de cor
