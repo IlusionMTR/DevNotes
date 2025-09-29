@@ -312,18 +312,8 @@ button:hover {
   button { width: 100%; text-align: center; }
   #add-note-container { gap: 0.5rem; }
   #notes-container { grid-template-columns: 1fr; padding: 1rem; }
+  #note-category { width: 100%; }
+  #add-note-container { padding: 0 0.5rem; }
   .note { min-height: 150px; }
-  
-  /* Mobile - Layout mais compacto */
-  #add-note-container {
-    padding: 0 0.5rem;
-  }
-  
-  .category-select-wrapper {
-    min-width: 100%;
-  }
-  
-  #note-category {
-    width: 100%;
-  }
+  .category-select-wrapper { min-width: 100%; }
 }
