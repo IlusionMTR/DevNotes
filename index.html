@@ -10,12 +10,10 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 
     <!-- Bootstrap Icons -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.1/font/bootstrap-icons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.1/font/bootstrap-icons.css"/>
 
-    <link rel="stylesheet" href="styles.css" />
-    <script src="scripts.js" defer></script>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="js/scripts.js" defer></script>
   </head>
   <body>
     <header>
@@ -31,12 +29,18 @@
     
     <div id="add-note-container">
       <input type="text" id="note-content" placeholder="O que deseja anotar?" />
-      <select id="note-category">
-        <option value="default">Normal</option>
-        <option value="urgent">Urgente</option>
-        <option value="progress">Em andamento</option>
-        <option value="done">Concluído</option>
-      </select>
+      
+      <!-- Select com indicador de cor -->
+      <div class="category-select-wrapper">
+        <select id="note-category">
+          <option value="default">Normal</option>
+          <option value="urgent">Urgente</option>
+          <option value="progress">Em andamento</option>
+          <option value="done">Concluído</option>
+        </select>
+        <span class="selected-color-indicator" id="color-indicator"></span>
+      </div>
+      
       <button class="add-note"><i class="bi bi-plus-lg"></i></button>
     </div>
 
