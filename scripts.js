@@ -8,10 +8,10 @@ const scoreValue = document.querySelector("#score-value");
 const feedbackEl = document.querySelector("#score-feedback");
 
 const categoryMap = {
-  done: "Concluído",
-  progress: "Em progresso",
-  default: "Não urgente",
-  urgent: "Urgente"
+  default: "Normal",
+  urgent: "Urgente",
+  progress: "Em andamento",
+  done: "Concluído"
 };
 
 const categoryColors = {
