@@ -5,6 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SuperNotes</title>
+     <link rel="stylesheet" href="styles.css" />
+    <script src="scripts.js" defer></script>
 
     <!-- SheetJS (XLSX.js) -->
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -12,8 +14,6 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.1/font/bootstrap-icons.css"/>
 
-    <link rel="stylesheet" href="styles.css" />
-    <script src="scripts.js" defer></script>
   </head>
   <body>
     <header>
@@ -30,7 +30,7 @@
     <div id="add-note-container">
       <input type="text" id="note-content" placeholder="O que deseja anotar?" />
       
-      <!-- Select com indicador de cor -->
+      <!-- Indicador de cor -->
       <div class="category-select-wrapper">
         <select id="note-category">
           <option value="default">Normal</option>
