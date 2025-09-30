@@ -214,7 +214,7 @@ function exportToXLSX() {
   XLSX.writeFile(workbook, "notas.xlsx");
 }
 
-// algoritmo produtividade
+// média
 function updateScore() {
   const notes = getNotes();
   
@@ -225,7 +225,6 @@ function updateScore() {
     return;
   }
 
-  // Foca apenas nas notas da semana
   const now = new Date();
   const startOfWeek = new Date(now);
   startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Segunda-feira
@@ -242,32 +241,26 @@ function updateScore() {
     feedbackEl.style.color = "#ccc";
     return;
   }
-
-  // 1. Tarefas concluídas = positivas
-  // 2. Tarefas urgentes não concluídas = negativas
-  // 3. Tarefas em andamento = neutras/parcialmente positivas
   
   const totalWeekNotes = weekNotes.length;
   const doneNotes = weekNotes.filter(n => n.category === 'done').length;
   const urgentNotes = weekNotes.filter(n => n.category === 'urgent').length;
   const progressNotes = weekNotes.filter(n => n.category === 'progress').length;
 
-  // Pontuação base: porcentagem de tarefas concluídas
+  // Pontuação
   let baseScore = (doneNotes / totalWeekNotes) * 100;
 
   const progressBonus = (progressNotes / totalWeekNotes) * 50;
   
-  // notas urgentes reduzem o scor
+  // notas urgentes reduzem o score
   const urgentPenalty = (urgentNotes / totalWeekNotes) * 30;
 
-  // Score final
   let finalScore = baseScore + progressBonus - urgentPenalty;
   finalScore = Math.max(0, Math.min(100, Math.round(finalScore)));
 
   // Display
   scoreValue.textContent = finalScore + "%";
   
-  // Feedback 
   if (finalScore === 0) {
     feedbackEl.textContent = "Vamos começar! Adicione suas tarefas.";
     feedbackEl.style.color = "#ff4d4d";
